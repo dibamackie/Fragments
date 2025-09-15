@@ -697,6 +697,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "signIn", ()=>signIn);
 parcelHelpers.export(exports, "getUser", ()=>getUser);
+// (optional) export if you need it elsewhere
+parcelHelpers.export(exports, "userManager", ()=>userManager);
 var _oidcClientTs = require("oidc-client-ts");
 const cognitoAuthConfig = {
     authority: `https://cognito-idp.us-east-1.amazonaws.com/${"us-east-1_gmBBtmweO"}`,
@@ -704,28 +706,24 @@ const cognitoAuthConfig = {
     redirect_uri: "http://localhost:1234",
     response_type: "code",
     scope: "phone openid email",
-    // no revoke of "access token" (https://github.com/authts/oidc-client-ts/issues/262)
     revokeTokenTypes: [
         "refresh_token"
     ],
-    // no silent renew via "prompt=none" (https://github.com/authts/oidc-client-ts/issues/366)
     automaticSilentRenew: false
 };
-// Create a UserManager instance
 const userManager = new (0, _oidcClientTs.UserManager)({
     ...cognitoAuthConfig
 });
 async function signIn() {
-    // Trigger a redirect to the Cognito auth page, so user can authenticate
     await userManager.signinRedirect();
 }
-// Create a simplified view of the user, with an extra method for creating the auth headers
 function formatUser(user) {
     console.log("User Authenticated", {
         user
     });
+    console.log("ID Token (JWT):", user.id_token);
+    window.currentUser = user; // quick copy() helper in DevTools
     return {
-        // If you add any other profile scopes, you can include them here
         username: user.profile["cognito:username"],
         email: user.profile.email,
         idToken: user.id_token,
@@ -737,14 +735,11 @@ function formatUser(user) {
     };
 }
 async function getUser() {
-    // First, check if we're handling a signin redirect callback (e.g., is ?code=... in URL)
     if (window.location.search.includes("code=")) {
         const user = await userManager.signinCallback();
-        // Remove the auth code from the URL without triggering a reload
         window.history.replaceState({}, document.title, window.location.pathname);
         return formatUser(user);
     }
-    // Otherwise, get the current user
     const user = await userManager.getUser();
     return user ? formatUser(user) : null;
 }
