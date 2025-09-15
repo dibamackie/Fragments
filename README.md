@@ -5,7 +5,6 @@ This UI uses **AWS Cognito Hosted UI** with **oidc-client-ts** to handle login/l
 
 ## Features
 - **Login with AWS Cognito** using Authorization Code Flow
-- **Logout** via Cognito Hosted UI
 - **Display welcome message** for authenticated users
 - **Fetch and list user fragments** from the Fragments API backend
 
@@ -56,6 +55,7 @@ OAUTH_SIGN_IN_REDIRECT_URL=http://localhost:1234
 ![4-Signup](https://github.com/user-attachments/assets/b7e25388-23d0-4a61-8584-bd6116235c45)
 ![5-LoginRedirect](https://github.com/user-attachments/assets/b350fd9e-4857-4905-bfb8-164d1fa8a55a)
 ![6-AWSConsoleUSERS](https://github.com/user-attachments/assets/7bdfdbab-dd82-41d9-b9fd-3a4fa0d6070f)
+
 
 
 
