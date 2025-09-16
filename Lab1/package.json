@@ -1,0 +1,35 @@
+{
+  "name": "fragments",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Fragments back-end API",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint \"./src/**/*.js\"",
+    "start": "node src/server.js",
+    "dev": "node --env-file=debug.env --watch ./src/server.js",
+    "debug": "node --env-file=debug.env --inspect=0.0.0.0:9229 --watch ./src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dibamackie/fragments.git"
+  },
+  "author": "Diba Makki",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "pino": "^9.9.4",
+    "pino-http": "^10.5.0",
+    "pino-pretty": "^13.1.1",
+    "stoppable": "^1.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "eslint": "^9.35.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2"
+  }
+}
