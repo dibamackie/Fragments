@@ -1,6 +1,5 @@
 # Lab 3 — CI + Unit Tests (Fragments)
 
-> **One repo, many labs.** Lab 3 lives in `Lab3/`. CI workflow is at `.github/workflows/ci.yml` and runs **inside `Lab3/`**.
 
 ## Setup
 
@@ -49,3 +48,4 @@
 * Upload the 5 screenshots to Blackboard.
 
 > Don’t commit `.env` or `coverage/`. `env.jest` and `tests/.htpasswd` are OK.
+
