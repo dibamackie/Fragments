@@ -25,7 +25,7 @@
 
 * Triggers on changes to `Lab3/**`.
 * Jobs: **ESLint** and **Unit Tests** (Node LTS, cached with `Lab3/package-lock.json`).
-* Badge (optional): `https://github.com/<you>/CCP555-2025F-NSC-Diba-Makki-144420189/actions/workflows/ci.yml/badge.svg?branch=main`
+
 
 ## Required screenshots
 
@@ -37,13 +37,5 @@
 ![00-ESLint and Unit Tests](https://github.com/user-attachments/assets/16fdfa4b-0f24-4d26-accb-0cebe68b6f7e)
 ![Actions](https://github.com/user-attachments/assets/ddd02af9-5371-476e-b562-f23faac2dbda)
 
-
-
-## Submit
-
-* Actions link: `.../actions/workflows/ci.yml`
-* Upload the 5 screenshots to Blackboard.
-
-> Don’t commit `.env` or `coverage/`. `env.jest` and `tests/.htpasswd` are OK.
 
 
