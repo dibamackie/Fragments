@@ -1,6 +1,5 @@
 # .github/workflows/ci.yml
  
-# Continuous Integration (CI) Workflow
 name: ci
  
 on:
@@ -34,5 +33,6 @@ jobs:
         # Use `ci` vs. `install`, see http://localhost:8080
         run: npm ci
  
+
       - name: Run ESLint
         run: npm run lint
