@@ -3,12 +3,17 @@
 name: ci
  
 on:
-  pull_request:
-    branches:
-      - main
   push:
-    branches:
-      - main
+    branches: [ main ]
+    paths: [ 'Lab3/**', '.github/workflows/ci.yml' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'Lab3/**', '.github/workflows/ci.yml' ]
+  workflow_dispatch:  # gives you the "Run workflow" button ?????
+
+defaults:
+  run:
+    working-directory: Lab3   # <--PLEASE run inside Lab3/ :D 
  
 jobs:
   lint:
