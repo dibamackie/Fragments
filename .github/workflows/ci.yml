@@ -33,3 +33,21 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+          cache-dependency-path: Lab3/package-lock.json  
+
+      # built-in npm command that does install + test
+      - name: Install deps and run tests
+        run: npm install-ci-test
