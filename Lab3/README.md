@@ -4,7 +4,8 @@
 ## Setup
 
 * `cd Lab3 && npm ci`
-* Test env: create users →
+
+
 
 
 * `env.jest` (committed):
@@ -36,6 +37,7 @@
 ![3-ESlintTest](https://github.com/user-attachments/assets/392b1a4f-9ced-400f-b53e-7d18e6d4bad5)
 ![00-ESLint and Unit Tests](https://github.com/user-attachments/assets/16fdfa4b-0f24-4d26-accb-0cebe68b6f7e)
 ![Actions](https://github.com/user-attachments/assets/ddd02af9-5371-476e-b562-f23faac2dbda)
+
 
 
 
