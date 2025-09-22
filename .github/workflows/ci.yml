@@ -14,9 +14,9 @@ on:
 
 defaults:
   run:
-    working-directory: Lab3   # <-- run inside Lab3/
+    working-directory: Lab3   # <-- PLEASE run inside Lab3/ :D
 
-    
+
 jobs:
   lint:
     # Give your job a name that will show up in the GitHub Actions web UI
