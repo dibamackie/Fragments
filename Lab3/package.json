@@ -20,10 +20,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^17.2.2",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "http-auth": "^4.2.1",
+    "http-auth-passport": "^1.0.7"
   },
   "devDependencies": {
+    "dotenv": "^17.2.2",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.32.0",
