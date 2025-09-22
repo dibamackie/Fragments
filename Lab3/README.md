@@ -6,10 +6,7 @@
 * `cd Lab3 && npm ci`
 * Test env: create users →
 
-  ```bash
-  npx htpasswd -cbB tests/.htpasswd user1@email.com password1
-  npx htpasswd -bB  tests/.htpasswd user2@email.com password2
-  ```
+
 * `env.jest` (committed):
 
   ```ini
@@ -48,4 +45,5 @@
 * Upload the 5 screenshots to Blackboard.
 
 > Don’t commit `.env` or `coverage/`. `env.jest` and `tests/.htpasswd` are OK.
+
 
