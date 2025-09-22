@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: npm
-          cache-dependency-path: Lab3/package-lock.json  
+         ## cache-dependency-path: Lab3/package-lock.json  
 
       # built-in npm command that does install + test
       - name: Install deps and run tests
