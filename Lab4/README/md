@@ -1,0 +1,15 @@
+Required Screenshots
+
+EC2 instance details (Public IPv4 & Public DNS visible)
+
+
+
+Browser → health check http://<PUBLIC_DNS>:8080/
+
+Local terminal curl http://<PUBLIC_DNS>:8080/
+
+EC2 terminal curl http://localhost:8080/
+
+Learner Lab CLI: start-instances JSON (shows pending)
+
+Learner Lab CLI: stop-instances JSON (shows stopping)
