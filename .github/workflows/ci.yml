@@ -26,13 +26,14 @@ jobs:
       run:
         working-directory: ${{ matrix.pkg }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'    # safer LTS; change to 'lts/*' if you prefer latest
-          cache: npm            # no cache-dependency-path -> no errors if lockfile missing
+          node-version: '20'     # stable LTS
+          cache: npm
 
       - name: Install deps
         run: |
@@ -55,7 +56,8 @@ jobs:
       run:
         working-directory: ${{ matrix.pkg }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
