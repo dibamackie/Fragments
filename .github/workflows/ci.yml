@@ -1,17 +1,20 @@
+# .github/workflows/ci.yml
+
+# Continuous Integration (CI) Workflow
 name: ci
 
+# This workflow will run whenever we push commits to the `main` branch, or
+# whenever there's a pull request to the `main` branch. See:
+# https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#on
 on:
-  push:
-    branches: [ main ]
-    paths: [ 'Lab3/**', '.github/workflows/ci.yml' ]
   pull_request:
-    branches: [ main ]
-    paths: [ 'Lab3/**', '.github/workflows/ci.yml' ]
-  workflow_dispatch:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
-defaults:
-  run:
-    working-directory: Lab3
+# modifications to .github/workflows/ci.yml
 
 jobs:
   lint:
@@ -25,8 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
-          cache: npm
-          cache-dependency-path: 'Lab3/package-lock.json'  # hopefully it works !
+          cache: 'npm'
 
       - name: Install node dependencies
         run: npm ci
@@ -45,9 +47,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
-          cache: npm
-          cache-dependency-path: Lab3/package-lock.json  
+          cache: 'npm'
 
-      # built-in npm command that does install + test
-      - name: Install deps and run tests
+      - name: Install node dependencies and run Tests
+        # There are two ways we could do this:
+        #
+        # 1. Call `npm ci` followed by `npm test` like so (NOTE: the use of | and -):
+        # run: |
+        # - npm install
+        # - npm test
+        #
+        # 2. Use `install-ci-test` to do it in a single command, see https://docs.npmjs.com/cli/v8/commands/npm-install-ci-test
+        # run: npm install-ci-test
         run: npm install-ci-test
