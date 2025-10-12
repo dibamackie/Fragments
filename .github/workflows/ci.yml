@@ -1,62 +1,66 @@
-# .github/workflows/ci.yml
-
-# Continuous Integration (CI) Workflow
 name: ci
 
-# This workflow will run whenever we push commits to the `main` branch, or
-# whenever there's a pull request to the `main` branch. See:
-# https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#on
 on:
-  pull_request:
-    branches:
-      - main
   push:
-    branches:
-      - main
-
-# modifications to .github/workflows/ci.yml
+    branches: [ main ]
+    paths:
+      - 'Lab3/**'
+      - 'Assignment1/fragment/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Lab3/**'
+      - 'Assignment1/fragment/**'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
 
 jobs:
   lint:
-    name: ESLint
+    name: ESLint (${{ matrix.pkg }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg: [ 'Lab3', 'Assignment1/fragment' ]
+    defaults:
+      run:
+        working-directory: ${{ matrix.pkg }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
-          cache: 'npm'
+          cache: npm
+          cache-dependency-path: ${{ matrix.pkg }}/package-lock.json
 
-      - name: Install node dependencies
+      - name: Install dependencies
         run: npm ci
 
       - name: Run ESLint
         run: npm run lint
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (${{ matrix.pkg }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg: [ 'Lab3', 'Assignment1/fragment' ]
+    defaults:
+      run:
+        working-directory: ${{ matrix.pkg }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
-          cache: 'npm'
+          cache: npm
+          cache-dependency-path: ${{ matrix.pkg }}/package-lock.json
 
-      - name: Install node dependencies and run Tests
-        # There are two ways we could do this:
-        #
-        # 1. Call `npm ci` followed by `npm test` like so (NOTE: the use of | and -):
-        # run: |
-        # - npm install
-        # - npm test
-        #
-        # 2. Use `install-ci-test` to do it in a single command, see https://docs.npmjs.com/cli/v8/commands/npm-install-ci-test
-        # run: npm install-ci-test
+      - name: Install deps and run tests
         run: npm install-ci-test
