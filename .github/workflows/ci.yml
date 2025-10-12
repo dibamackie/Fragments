@@ -1,75 +1,93 @@
+# .github/workflows/ci.yml
+
 name: ci
-
+ 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'Lab3/**'
-      - 'Assignment1/fragment/**'
-      - '.github/workflows/ci.yml'
+
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'Lab3/**'
-      - 'Assignment1/fragment/**'
-      - '.github/workflows/ci.yml'
-  workflow_dispatch:
 
+    branches:
+
+      - main
+
+  push:
+
+    branches:
+
+      - main
+ 
 jobs:
+
   lint:
-    name: ESLint (${{ matrix.pkg }})
+
+    name: ESLint
+
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        pkg: [ 'Lab3', 'Assignment1/fragment' ]
+
     defaults:
+
       run:
-        working-directory: ${{ matrix.pkg }}
+
+        working-directory: Assignment1/fragments  # 👈 updated path
+
     steps:
+
       - name: Check out code
+
         uses: actions/checkout@v4
+ 
+      - name: Setup Node
 
-      - name: Setup Node.js
         uses: actions/setup-node@v4
+
         with:
-          node-version: '20'     # stable LTS
-          cache: npm
 
-      - name: Install deps
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          node-version: 'lts/*'
 
+          cache: 'npm'
+
+          cache-dependency-path: Assignment1/fragments/package-lock.json  # 👈 updated path
+ 
+      - name: Install node dependencies
+
+        run: npm ci
+ 
       - name: Run ESLint
+
         run: npm run lint
-
+ 
   unit-tests:
-    name: Unit Tests (${{ matrix.pkg }})
+
+    name: Unit Tests
+
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        pkg: [ 'Lab3', 'Assignment1/fragment' ]
+
     defaults:
+
       run:
-        working-directory: ${{ matrix.pkg }}
+
+        working-directory: Assignment1/fragments  # 👈 same here
+
     steps:
+
       - name: Check out code
+
         uses: actions/checkout@v4
+ 
+      - name: Setup Node
 
-      - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
 
-      - name: Install deps and run tests
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
-          npm test
+        with:
+
+          node-version: 'lts/*'
+
+          cache: 'npm'
+
+          cache-dependency-path: Assignment1/fragments/package-lock.json
+ 
+      - name: Install node dependencies and run Tests
+
+        run: npm install-ci-test
+
+ 
