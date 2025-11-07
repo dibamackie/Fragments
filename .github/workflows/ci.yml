@@ -84,6 +84,8 @@ jobs:
           SHA_TAG: sha-${{ github.sha }}
         uses: docker/build-push-action@v6
         with:
+          context: Lab7/fragments        # <-- This tells Docker where the root of the build is
+          file: Lab7/fragments/Dockerfile # <-- This explicitly tells Docker which Dockerfile to use
           push: true
           # Use 3 tags: sha-..., main, and latest
           tags: ${{ env.DOCKERHUB_REPO }}:${{ env.SHA_TAG }},${{ env.DOCKERHUB_REPO }}:main,${{ env.DOCKERHUB_REPO }}:latest
