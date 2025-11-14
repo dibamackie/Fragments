@@ -11,7 +11,7 @@ const app = require('./app');
 
 // Check if LOG_LEVEL is set to debug
 if (process.env.LOG_LEVEL === 'debug') {
-  logger.debug('Environment Variables:', process.env);
+  logger.debug('Environment Variables:' + process.env.PORT + ' ' + process.env.LOG_LEVEL);
 }
 
 // Get the desired port from the process' environment. Default to `8080`

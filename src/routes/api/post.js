@@ -37,7 +37,7 @@ module.exports = (req, res) => {
     }
 
     // Log the creation of the new fragment (info log for regular operations)
-    const ownerId = req.user;  // Assuming user ID is stored in req.user
+    const ownerId = req.user; // Assuming user ID is stored in req.user
     const fragment = new Fragment({
       ownerId,
       type,
@@ -64,9 +64,9 @@ module.exports = (req, res) => {
       status: 'ok',
       fragment: {
         id: fragment.id,
-        ownerId: fragment.ownerId,
         created: fragment.created,
         updated: fragment.updated,
+        ownerId: fragment.ownerId,
         type: fragment.type,
         size: fragment.size,
       },
@@ -75,29 +75,28 @@ module.exports = (req, res) => {
     // Set the Location header and respond (info log for successful response)
     res.setHeader('Location', locationUrl);
 
-        // Construct the response body
-        const responseBody = {
-          status: 'ok',
-          message: 'Fragment created successfully',
-          fragment: {
-            id: fragment.id,
-            created: fragment.created,
-            updated: fragment.updated,
-            ownerId: fragment.ownerId,
-            type: fragment.type,
-            size: fragment.size,
-          },
-        };
+    // Construct the response body
+    const responseBody = {
+      status: 'ok',
+      message: 'Fragment created successfully',
+      fragment: {
+        id: fragment.id,
+        created: fragment.created,
+        updated: fragment.updated,
+        ownerId: fragment.ownerId,
+        type: fragment.type,
+        size: fragment.size,
+      },
+    };
 
     // Send a success response with status code 201 (Created) and the fragment ID
     res.status(201).json(responseBody);
 
     logger.info('Fragment created with ID:', fragment.id);
-
   } catch (err) {
     // Log the unexpected error (error log for unexpected issues)
     logger.error('Error processing fragment:', err);
-    
+
     // Handle any unexpected errors
     res.status(500).json({ error: 'Internal server error.' });
   }
