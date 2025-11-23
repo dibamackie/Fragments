@@ -46,7 +46,7 @@ describe('GET /v1/fragments/:id', () => {
     const res = await request(app).get(`/v1/fragments/${fragmentId}`).auth(userEmail, userPassword);
 
     expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type']).toBe('text/plain; charset=utf-8');
+    expect(res.headers['content-type']).toBe('text/plain');
     expect(res.headers['content-length']).toBe('18');
     expect(res.text).toBe('This is a fragment');
   });
@@ -69,6 +69,6 @@ describe('GET /v1/fragments/:id', () => {
     console.log(res.headers);
 
     expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type']).toBe('application/octet-stream; charset=utf-8');
+    expect(res.headers['content-type']).toBe('application/octet-stream');
   });
 });
