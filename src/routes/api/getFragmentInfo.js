@@ -12,12 +12,12 @@ module.exports = async (req, res) => {
     }
     let fragment;
 
-    try {
-      fragment = await Fragment.byId(userId, fragmentId);
-    } catch (error) {
-      logger.error(`Error fetching fragment ${fragmentId} for user ${userId}:`, error);
-      return res.status(404).json({ error: 'Fragment not found.' });
-    }
+      try{
+        fragment = await Fragment.byId(userId, fragmentId);
+      } catch (error) {
+        logger.error(`Error fetching fragment ${fragmentId} for user ${userId}:`, error);
+        return res.status(404).json({ error: 'Fragment not found.' });
+      }
 
     // Return the metadata of the fragment
     const metadata = {

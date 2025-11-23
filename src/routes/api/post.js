@@ -1,17 +1,14 @@
 const { Fragment } = require('../../model/fragment');
-const contentType = require('content-type');
 
-const pino = require('pino');
-const logger = pino();
-require('dotenv').config();
+const logger = require('../../logger');
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   try {
     // Log the authenticated user (info log to keep track of the user making the request)
     logger.info('Authenticated user:', req.user);
 
     // Log the request body and Content-Type (debug log to track incoming data)
-    console.log('Request body:', req.body);
+    logger.debug('Request body:', req.body);
     console.log('Content-Type header:', req.headers['content-type']);
 
     // Check if body is a Buffer and not empty (warn level log if the body is invalid)
@@ -21,8 +18,8 @@ module.exports = (req, res) => {
     }
 
     // Parse Content-Type header to determine the type of data (debug log to track type parsing)
-    const { type } = contentType.parse(req);
-    logger.debug('Parsed Content-Type:', type);
+    const type = req.headers['content-type'];
+    console.log('Parsed Content-Type:', type);
 
     // Check if the Content-Type is supported (warn level log for unsupported types)
     if (!Fragment.isSupportedType(type)) {
@@ -37,7 +34,7 @@ module.exports = (req, res) => {
     }
 
     // Log the creation of the new fragment (info log for regular operations)
-    const ownerId = req.user; // Assuming user ID is stored in req.user
+    const ownerId = req.user;  // Assuming user ID is stored in req.user
     const fragment = new Fragment({
       ownerId,
       type,
@@ -46,21 +43,21 @@ module.exports = (req, res) => {
     logger.info('Fragment object created:', fragment);
 
     // Save the fragment metadata (info log to confirm successful metadata storage)
-    fragment.save();
+    await fragment.save();
     logger.info('Fragment metadata saved.');
 
     // Store the raw binary data in the fragment (info log to confirm data storage)
-    fragment.setData(req.body);
+    await fragment.setData(req.body);
     logger.info('Raw data stored in fragment.');
 
     // Generate the Location header using the API_URL or request's host (info log for URL generation)
     const apiUrl = process.env.API_URL || `http://${req.headers.host}`;
     const locationUrl = new URL(`/v1/fragments/${fragment.id}`, apiUrl).toString();
     logger.info('Generated Location URL:', locationUrl);
-    console.log('Generated Location URL:', locationUrl);
 
-    // Log the successful creation response and fragment details to the console
-    console.log({
+    console.log(fragment.type);
+    // Log the successful creation response and fragment details
+    logger.info('Fragment creation response:', {
       status: 'ok',
       fragment: {
         id: fragment.id,
@@ -93,10 +90,11 @@ module.exports = (req, res) => {
     res.status(201).json(responseBody);
 
     logger.info('Fragment created with ID:', fragment.id);
+
   } catch (err) {
     // Log the unexpected error (error log for unexpected issues)
     logger.error('Error processing fragment:', err);
-
+    
     // Handle any unexpected errors
     res.status(500).json({ error: 'Internal server error.' });
   }
