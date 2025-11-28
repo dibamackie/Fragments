@@ -16,7 +16,7 @@ describe('GET /v1/fragments/:id with format conversion', () => {
     Fragment.byId.mockResolvedValue({
       id: fragmentId,
       type: 'text/markdown',
-      mimeType: 'text/markdown', // 👈 required by get.js
+      mimeType: 'text/markdown',
       size: markdownData.length,
       isText: true,
       getData: jest.fn().mockResolvedValue(Buffer.from(markdownData)),
@@ -33,24 +33,19 @@ describe('GET /v1/fragments/:id with format conversion', () => {
       .auth(userId, 'password1')
       .timeout(10000); // Set a timeout of 5 seconds
 
-
     expect(res.statusCode).toBe(200);
     expect(res.headers['content-type']).toBe('text/html');
   });
 
   test('should return Markdown as plain text when requesting .txt', async () => {
-    const res = await request(app)
-      .get(`/v1/fragments/${fragmentId}.txt`)
-      .auth(userId, 'password1');
-  
+    const res = await request(app).get(`/v1/fragments/${fragmentId}.txt`).auth(userId, 'password1');
+
     expect(res.statusCode).toBe(200);
     expect(res.headers['content-type']).toBe('text/plain');
     expect(res.text.trim()).toBe(markdownData.trim());
   });
   test('should return raw Markdown when requesting .md', async () => {
-    const res = await request(app)
-      .get(`/v1/fragments/${fragmentId}.md`)
-      .auth(userId, 'password1'); 
+    const res = await request(app).get(`/v1/fragments/${fragmentId}.md`).auth(userId, 'password1');
 
     expect(res.statusCode).toBe(200);
     expect(res.headers['content-type']).toBe('text/markdown');
@@ -64,7 +59,7 @@ describe('GET /v1/fragments/:id with format conversion', () => {
 
     const res = await request(app)
       .get(`/v1/fragments/${fragmentId}.html`)
-      .auth(userId, 'password1'); 
+      .auth(userId, 'password1');
 
     expect(res.statusCode).toBe(200);
     expect(res.headers['content-type']).toBe('text/html');

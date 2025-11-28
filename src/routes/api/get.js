@@ -1,3 +1,5 @@
+// src\routes\api\get.js
+
 const { createSuccessResponse } = require('../../response');
 const { listFragments } = require('../../model/data/memory/index'); // Import readFragment for expanded data
 const logger = require('../../logger');
@@ -17,13 +19,13 @@ module.exports = async (req, res) => {
 
     // If the request has an ID parameter, return a specific fragment
     if (req.params.id) {
-      let { id } = req.params;  // Extract fragmentId
+      let { id } = req.params; // Extract fragmentId
       logger.info(`Fetching fragment ${id} for user ${userId}`);
-      
+
       // Extract the extension (if any) from the fragmentId, including the dot
-      const extension = id.includes('.') ? id.slice(id.lastIndexOf('.')) : '';  // Everything after the last dot
+      const extension = id.includes('.') ? id.slice(id.lastIndexOf('.')) : ''; // Everything after the last dot
       logger.info(`File extension: ${extension}`);
-      
+
       // Store the extension for later use, and remove the extension from fragmentId for querying
       const fragmentId = extension ? id.slice(0, id.lastIndexOf('.')) : id;
 
@@ -47,34 +49,35 @@ module.exports = async (req, res) => {
         logger.error(`Error retrieving data for fragment ${id}:`, error);
         return res.status(404).json({ error: 'Fragment data not found.' });
       }
-      
+
       // Handle conversion based on the file extension
       let dataString = '';
       let contentType = fragment.type;
-
 
       if (!extension) {
         // No extension provided, return raw fragment data
         if (!fragment.isText) {
           dataString = fragmentData.toString('base64'); // Convert binary data to base64
-          contentType = fragment.type;  // Set the appropriate content type for binary data
+          contentType = fragment.type; // Set the appropriate content type for binary data
         } else {
           dataString = fragmentData.toString('utf-8'); // Return raw text data
-          contentType = fragment.type;  
+          contentType = fragment.type;
         }
         console.log('Content type:', contentType);
         res.writeHead(200, {
           'Content-Type': contentType,
-          'Content-Length': fragment.size
+          'Content-Length': fragment.size,
         });
         res.end(dataString);
 
         return;
       }
 
-      
       // Process extensions and conversions
-      if (extension === '.html' && (fragment.type === 'text/plain' || fragment.type === 'text/markdown')) {
+      if (
+        extension === '.html' &&
+        (fragment.type === 'text/plain' || fragment.type === 'text/markdown')
+      ) {
         // Convert Markdown to HTML
         const md = markdownIt();
         dataString = md.render(fragmentData.toString('utf-8'));
@@ -88,17 +91,17 @@ module.exports = async (req, res) => {
         contentType = 'text/markdown';
       } else if (
         extension &&
-        (!['.md', '.html', '.txt'].includes(extension) || 
-        !['text/plain', 'text/markdown', 'text/html'].includes(fragment.type))
+        (!['.md', '.html', '.txt'].includes(extension) ||
+          !['text/plain', 'text/markdown', 'text/html'].includes(fragment.type))
       ) {
         return res.status(415).json({ error: 'Unsupported file extension or conversion type.' });
       }
-      
+
       // Return the fragment's data with the appropriate content type
-      console.log("data string", dataString);
+      console.log('data string', dataString);
       res.writeHead(200, {
         'Content-Type': contentType, // Ensure no charset
-        'Content-Length': fragment.size
+        'Content-Length': fragment.size,
       });
       res.end(dataString);
       return;
@@ -127,5 +130,4 @@ module.exports = async (req, res) => {
     console.error('Error fetching fragments:', err); // Log error
     res.status(500).json({ error: 'Internal server error.' });
   }
-  
 };

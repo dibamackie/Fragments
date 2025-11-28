@@ -83,7 +83,12 @@ class Fragment {
    * @param {string} id fragment's id
    * @returns Promise<void>
    */
-  static delete(ownerId, id) {
+  static async delete(ownerId, id) {
+    const fragment = await Fragment.byId(ownerId, id);
+    if (!fragment) {
+      throw new Error(`Fragment ${id} not found for owner ${ownerId}`);
+    }
+    console.log(`Moving forward to deleteFragment`);
     return deleteFragment(ownerId, id);
   }
 

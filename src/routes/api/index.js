@@ -35,4 +35,6 @@ router.get('/fragments/:id/info', require('./getFragmentInfo')); //Assignment 2
 // Middleware to validate body and content type
 router.post('/fragments', rawBody(), require('./post'));
 
+router.delete('/fragments/:id', require('./delete'));
+
 module.exports = router;

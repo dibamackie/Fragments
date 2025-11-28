@@ -32,10 +32,10 @@ function readFragmentData(ownerId, id) {
 
 // Get a list of fragment ids/objects for the given user from memory db. Returns a Promise
 async function listFragments(ownerId, expand = false) {
-  console.log("Listing fragments for ownerId:", ownerId);
+  console.log('Listing fragments for ownerId:', ownerId);
 
   const fragments = await metadata.query(ownerId);
-  console.log("Fragments fetched from memory:", fragments);
+  console.log('Fragments fetched from memory:', fragments);
 
   if (!fragments || !Array.isArray(fragments)) {
     // Return empty array if no fragments or fragments aren't an array
@@ -44,36 +44,46 @@ async function listFragments(ownerId, expand = false) {
 
   // If expand is true, return full fragments (parse each fragment from JSON)
   if (expand) {
-    return fragments.map(fragment => {
-      try {
-        return JSON.parse(fragment);
-      } catch (error) {
-        console.error("Error parsing fragment:", fragment, error);
-        return null; 
-      }
-    }).filter(fragment => fragment !== null); 
+    return fragments
+      .map((fragment) => {
+        try {
+          return JSON.parse(fragment);
+        } catch (error) {
+          console.error('Error parsing fragment:', fragment, error);
+          return null;
+        }
+      })
+      .filter((fragment) => fragment !== null);
   }
 
   // Otherwise, return only the fragment IDs
-  return fragments.map((fragment) => {
-    try {
-      const parsedFragment = JSON.parse(fragment);
-      return parsedFragment.id;
-    } catch (error) {
-      console.error("Error parsing fragment for ID:", fragment, error);
-      return null;
-    }
-  }).filter(id => id !== null);  // Filter out any null IDs in case of errors
+  return fragments
+    .map((fragment) => {
+      try {
+        const parsedFragment = JSON.parse(fragment);
+        return parsedFragment.id;
+      } catch (error) {
+        console.error('Error parsing fragment for ID:', fragment, error);
+        return null;
+      }
+    })
+    .filter((id) => id !== null); // Filter out any null IDs in case of errors
 }
 
 // Delete a fragment's metadata and data from memory db. Returns a Promise
-function deleteFragment(ownerId, id) {
-  return Promise.all([
-    // Delete metadata
-    metadata.del(ownerId, id),
-    // Delete data
-    data.del(ownerId, id),
-  ]);
+async function deleteFragment(ownerId, id) {
+  try {
+    console.log(`Deleting fragment metadata for ownerId: ${ownerId}, id: ${id}`);
+    await metadata.del(ownerId, id);
+
+    console.log(`Deleting fragment data for ownerId: ${ownerId}, id: ${id}`);
+    await data.del(ownerId, id);
+
+    console.log(`Successfully deleted fragment ${id} for owner ${ownerId}`);
+  } catch (error) {
+    console.error(`Error deleting fragment ${id} for owner ${ownerId}:`, error);
+    throw error; // Ensure error propagates correctly
+  }
 }
 
 module.exports.listFragments = listFragments;

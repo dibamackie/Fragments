@@ -2,11 +2,13 @@
 
 const express = require('express');
 const { authenticate } = require('../auth');
-const { createSuccessResponse, createErrorResponse } = require('../response');
+const { createSuccessResponse } = require('../response');
+const { hostname } = require('os');
 
-
+///????
+// console.log(hostname());
 // version and author from package.json
-const { version, author } = require('../../package.json');
+const { version } = require('../../package.json');
 
 // Create a router that we can use to mount our API
 const router = express.Router();
@@ -23,20 +25,17 @@ router.use(`/v1`, authenticate(), require('./api'));
  * we'll respond with a 200 OK.  If not, the server isn't healthy.
  */
 router.get('/', (req, res) => {
-  try {
-    // Client's shouldn't cache this response (always request it fresh)
-    res.setHeader('Cache-Control', 'no-cache');
-    // Send a 200 'OK' response
-    res.status(200).json(
-      createSuccessResponse({
-        author,
-        githubUrl: 'https://github.com/dibamackie/fragments.git', // Use your GitHub URL
-        version,
-      })
-    );
-  } catch (error) {
-    res.status(500).json(createErrorResponse('Internal Server Error ' + error, 500));
-  }
+  res.setHeader('Cache-Control', 'no-cache');
+  res.status(200).json(
+    createSuccessResponse({
+      // TODO: make sure these are changed for your name and repo
+      author: 'Diba Makki',
+      githubUrl: 'https://github.com/dibamackie/fragments.git',
+      version,
+      // Include the hostname in the response
+      hostname: hostname(),
+    })
+  );
 });
 
 module.exports = router;

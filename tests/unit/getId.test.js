@@ -62,7 +62,7 @@ describe('GET /v1/fragments/:id', () => {
       getData: jest.fn().mockResolvedValue(mockBinaryData),
     };
 
-    Fragment.byId.mockResolvedValue(mockFragment);
+    await Fragment.byId.mockResolvedValue(mockFragment);
 
     const res = await request(app).get(`/v1/fragments/${fragmentId}`).auth(userEmail, userPassword);
 
