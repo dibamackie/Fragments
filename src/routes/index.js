@@ -30,7 +30,7 @@ router.get('/', (req, res) => {
     createSuccessResponse({
       // TODO: make sure these are changed for your name and repo
       author: 'Diba Makki',
-      githubUrl: 'https://github.com/dibamackie/fragments.git',
+      githubUrl: 'https://github.com/dibamackie/CCP555-2025F-NSC-Diba-Makki-144420189',
       version,
       // Include the hostname in the response
       hostname: hostname(),
