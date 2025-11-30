@@ -2,11 +2,10 @@
 
 const express = require('express');
 const { authenticate } = require('../auth');
-const { createSuccessResponse } = require('../response');
+const { createSuccessResponse} = require('../response');
 const { hostname } = require('os');
 
-///????
-// console.log(hostname());
+
 // version and author from package.json
 const { version } = require('../../package.json');
 

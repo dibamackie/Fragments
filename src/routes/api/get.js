@@ -1,133 +1,188 @@
-// src\routes\api\get.js
-
 const { createSuccessResponse } = require('../../response');
-const { listFragments } = require('../../model/data/memory/index'); // Import readFragment for expanded data
-const logger = require('../../logger');
+const { listFragments } = require('../../model/data');
 const { Fragment } = require('../../model/fragment');
 const markdownIt = require('markdown-it');
+const sharp = require('sharp');
+const yaml = require('js-yaml');
 
-/**
- * Get a list of fragments for the current user
- */
 module.exports = async (req, res) => {
   try {
-    const userId = req.user; // Assuming req.user contains the authenticated user ID
-
+    const userId = req.user;
     if (!userId) {
+      console.warn('No authenticated user found');
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // If the request has an ID parameter, return a specific fragment
+    console.log(`User ID: ${userId}`);
+
     if (req.params.id) {
-      let { id } = req.params; // Extract fragmentId
-      logger.info(`Fetching fragment ${id} for user ${userId}`);
+      let { id } = req.params;
+      const possibleExt = id.match(/\.(txt|md|html|csv|json|ya?ml|png|jpe?g|webp|gif|avif)$/i);
+      const extension = possibleExt ? possibleExt[0] : '';
+      const fragmentId = extension ? id.slice(0, -extension.length) : id;
 
-      // Extract the extension (if any) from the fragmentId, including the dot
-      const extension = id.includes('.') ? id.slice(id.lastIndexOf('.')) : ''; // Everything after the last dot
-      logger.info(`File extension: ${extension}`);
-
-      // Store the extension for later use, and remove the extension from fragmentId for querying
-      const fragmentId = extension ? id.slice(0, id.lastIndexOf('.')) : id;
-
-      // Log the fragmentId and the extracted extension
-      logger.info(`Fragment ID for querying: ${fragmentId}`);
+      console.log(`Requested fragment ID: ${fragmentId}`);
+      console.log(`Requested extension: ${extension || '(none)'}`);
 
       let fragment;
       try {
         fragment = await Fragment.byId(userId, fragmentId);
+        console.log(`Fragment found: ${fragment.id}, type: ${fragment.type}, size: ${fragment.size}`);
       } catch (error) {
-        logger.error(`Error fetching fragment ${id} for user ${userId}:`, error);
+        console.error(`Fragment not found for ID ${fragmentId}:`, error);
         return res.status(404).json({ error: 'Fragment not found.' });
       }
-
-      logger.info('Fragment found:', fragment);
 
       let fragmentData;
       try {
         fragmentData = await fragment.getData();
+        console.log(`Retrieved fragment data: ${fragmentData.length} bytes`);
       } catch (error) {
-        logger.error(`Error retrieving data for fragment ${id}:`, error);
+        console.error(`Error getting data for fragment ${fragmentId}:`, error);
         return res.status(404).json({ error: 'Fragment data not found.' });
       }
 
-      // Handle conversion based on the file extension
-      let dataString = '';
-      let contentType = fragment.type;
+      const originalMime = fragment.mimeType || fragment.type;
+      console.log(`Original MIME type: ${originalMime}`);
+
+      const supportedConversions = {
+        'text/plain': ['.txt'],
+        'text/markdown': ['.md', '.html', '.txt'],
+        'text/html': ['.html', '.txt'],
+        'text/csv': ['.csv', '.txt', '.json'],
+        'application/json': ['.json', '.yaml', '.yml', '.txt'],
+        'application/yaml': ['.yaml', '.txt'],
+        'image/png': ['.png', '.jpg', '.webp', '.gif', '.avif'],
+        'image/jpeg': ['.png', '.jpg', '.webp', '.gif', '.avif'],
+        'image/webp': ['.png', '.jpg', '.webp', '.gif', '.avif'],
+        'image/avif': ['.png', '.jpg', '.webp', '.gif', '.avif'],
+        'image/gif': ['.png', '.jpg', '.webp', '.gif', '.avif'],
+      };
+
+      const extToMime = {
+        '.txt': 'text/plain',
+        '.md': 'text/markdown',
+        '.html': 'text/html',
+        '.csv': 'text/csv',
+        '.json': 'application/json',
+        '.yaml': 'application/yaml',
+        '.yml': 'application/yaml',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.webp': 'image/webp',
+        '.gif': 'image/gif',
+        '.avif': 'image/avif',
+      };
 
       if (!extension) {
-        // No extension provided, return raw fragment data
-        if (!fragment.isText) {
-          dataString = fragmentData.toString('base64'); // Convert binary data to base64
-          contentType = fragment.type; // Set the appropriate content type for binary data
-        } else {
-          dataString = fragmentData.toString('utf-8'); // Return raw text data
-          contentType = fragment.type;
-        }
-        console.log('Content type:', contentType);
+        console.log('No extension provided. Returning raw fragment.');
+      
         res.writeHead(200, {
-          'Content-Type': contentType,
-          'Content-Length': fragment.size,
+          'Content-Type': fragment.type,
+          'Content-Length': fragmentData.length
         });
-        res.end(dataString);
-
+      
+        console.log(`Sending raw binary data with Content-Type: ${fragment.type}, length: ${fragmentData.length}`);
+        res.end(fragmentData); // ✅ send Buffer directly
         return;
       }
 
-      // Process extensions and conversions
-      if (
-        extension === '.html' &&
-        (fragment.type === 'text/plain' || fragment.type === 'text/markdown')
-      ) {
-        // Convert Markdown to HTML
-        const md = markdownIt();
-        dataString = md.render(fragmentData.toString('utf-8'));
-        console.log('HTML get:', dataString);
-        contentType = 'text/html';
-      } else if (extension === '.txt' && fragment.isText) {
-        dataString = fragmentData.toString('utf-8');
-        contentType = 'text/plain';
-      } else if (extension === '.md' && fragment.isText) {
-        dataString = fragmentData.toString('utf-8');
-        contentType = 'text/markdown';
-      } else if (
-        extension &&
-        (!['.md', '.html', '.txt'].includes(extension) ||
-          !['text/plain', 'text/markdown', 'text/html'].includes(fragment.type))
-      ) {
+      const allowedExt = supportedConversions[originalMime];
+      if (!allowedExt || !allowedExt.includes(extension)) {
+        console.warn(`Unsupported extension ${extension} for MIME type ${originalMime}`);
         return res.status(415).json({ error: 'Unsupported file extension or conversion type.' });
       }
 
-      // Return the fragment's data with the appropriate content type
-      console.log('data string', dataString);
+      let resultBuffer = fragmentData;
+      let outputMime = extToMime[extension];
+      console.log(`Target extension ${extension} mapped to MIME: ${outputMime}`);
+
+      if (originalMime.startsWith('text') || originalMime.startsWith('application')) {
+        const raw = fragmentData.toString('utf-8');
+        console.log(`Raw text preview: ${raw.slice(0, 100)}...`);
+
+        switch (extension) {
+          case '.html':
+            if (originalMime === 'text/markdown' && extension === '.html') {
+              console.log('Converting Markdown to HTML');
+              resultBuffer = Buffer.from(markdownIt().render(raw), 'utf-8');
+            } else {
+              console.log('Performing generic text conversion');
+              resultBuffer = Buffer.from(raw, 'utf-8');
+            }
+            break;
+          case '.json':
+            if (originalMime === 'text/csv') {
+              console.log('Converting CSV to JSON');
+              const lines = raw.trim().split('\n');
+              const headers = lines[0].split(',');
+              const rows = lines.slice(1).map(line => {
+                const values = line.split(',');
+                return headers.reduce((obj, h, i) => (obj[h] = values[i], obj), {});
+              });
+              resultBuffer = Buffer.from(JSON.stringify(rows, null, 2), 'utf-8');
+            } else if (originalMime === 'application/yaml') {
+              console.log('Converting YAML to JSON');
+              resultBuffer = Buffer.from(JSON.stringify(yaml.load(raw), null, 2), 'utf-8');
+            }
+            break;
+          case '.yaml':
+          case '.yml':
+            if (originalMime === 'application/json') {
+              console.log('Converting JSON to YAML');
+              resultBuffer = Buffer.from(yaml.dump(JSON.parse(raw)), 'utf-8');
+            }
+            break;
+          default:
+            console.log('Performing generic text conversion');
+            resultBuffer = Buffer.from(raw, 'utf-8');
+        }
+      } else if (originalMime.startsWith('image')) {
+        try {
+          console.log(`Converting image to ${extension}`);
+        
+          switch (extension) {
+            case '.jpg':
+            case '.jpeg':
+              resultBuffer = await sharp(fragmentData).jpeg().toBuffer();
+              break;
+            case '.png':
+              resultBuffer = await sharp(fragmentData).png().toBuffer();
+              break;
+            case '.webp':
+              resultBuffer = await sharp(fragmentData).webp().toBuffer();
+              break;
+            case '.gif':
+              resultBuffer = await sharp(fragmentData).gif().toBuffer();
+              break;
+            case '.avif':
+              resultBuffer = await sharp(fragmentData).avif().toBuffer();
+              break;
+            default:
+              throw new Error(`Unsupported image conversion: ${extension}`);
+          }
+        } catch (err) {
+          console.error(`Sharp conversion error: ${err.message}`);
+          return res.status(500).json({ error: 'Image conversion failed.' });
+        }
+      }
+
+      console.log(`Sending converted data with Content-Type: ${outputMime}, length: ${resultBuffer.length}`);
       res.writeHead(200, {
-        'Content-Type': contentType, // Ensure no charset
-        'Content-Length': fragment.size,
+        'Content-Type': outputMime,
+        'Content-Length': resultBuffer.length,
       });
-      res.end(dataString);
+      res.end(resultBuffer);
       return;
     }
 
-    // No id parameter, return a list of fragments
-    const expand = req.query.expand === '1'; // If expand=1 is passed, return full metadata
-
-    // Get the list of fragment ids (or full metadata if expand is true)
+    console.log('No :id param. Returning fragment list');
+    const expand = req.query.expand === '1';
     const fragments = await listFragments(userId, expand);
-
-    // Log the fragments and status to the console
-    console.log({
-      status: 'ok',
-      fragments: fragments,
-    });
-
-    // Return success response with fragments data
-    res.status(200).json(
-      createSuccessResponse({
-        fragments: fragments, // This will either be just the fragment IDs or full metadata
-      })
-    );
+    console.log(`Returning ${fragments.length} fragments`);
+    res.status(200).json(createSuccessResponse({ fragments }));
   } catch (err) {
-    // Handle errors
-    console.error('Error fetching fragments:', err); // Log error
+    console.error('Unhandled error in GET /fragments:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
 };

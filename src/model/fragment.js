@@ -15,33 +15,26 @@ const {
 } = require('./data');
 
 class Fragment {
-  constructor({
-    id = randomUUID(),
-    ownerId,
-    type,
-    size = 0,
-    created = new Date().toISOString(),
-    updated = new Date().toISOString(),
-  }) {
-    if (!ownerId || !type) {
-      throw new Error('ownerId and type are required');
-    }
-
-    if (typeof size !== 'number' || size < 0) {
-      throw new Error('size must be a non-negative number');
-    }
-
-    // Validate type
-    if (!Fragment.isSupportedType(type)) {
-      throw new Error(`Invalid type: ${type}`);
-    }
-
-    this.id = id;
-    this.ownerId = ownerId;
-    this.type = type;
-    this.size = size;
-    this.created = created;
-    this.updated = updated;
+    constructor({ id = randomUUID(), ownerId, type, size = 0, created = new Date().toISOString(), updated = new Date().toISOString() }) {
+      if (!ownerId || !type) {
+        throw new Error('ownerId and type are required');
+      }
+  
+      if (typeof size !== 'number' || size < 0) {
+        throw new Error('size must be a non-negative number');
+      }
+  
+      // Validate type
+      if (!Fragment.isSupportedType(type)) {
+        throw new Error(`Invalid type: ${type}`);
+      }
+  
+      this.id = id;
+      this.ownerId = ownerId;
+      this.type = type;
+      this.size = size;
+      this.created = created;
+      this.updated = updated;
   }
 
   /**
@@ -52,13 +45,13 @@ class Fragment {
    */
   static async byUser(ownerId, expand = false) {
     const fragments = await listFragments(ownerId, expand);
-    console.log('Fragments fetched from memory:', fragments);
+    console.log("Fragments fetched from memory:", fragments);
     if (!expand) {
-      console.log('map');
-      return fragments.map((fragment) => fragment.id);
+      console.log("Returning fragment IDs:", fragments);
+      return fragments;  // No need to map, it's already an array of IDs
     }
     console.log('not map');
-    return fragments;
+    return fragments; 
   }
 
   /**
@@ -97,8 +90,15 @@ class Fragment {
    * @returns Promise<void>
    */
   save() {
-    this.updated = new Date().toISOString();
-    writeFragment(this);
+    return new Promise((resolve, reject) => {
+      this.updated = new Date().toISOString();
+      try {
+        writeFragment(this); // Assuming writeFragment is synchronous
+        resolve(); // Indicate success
+      } catch (error) {
+        reject(error); // Propagate any error
+      }
+    });
   }
 
   /**
@@ -160,11 +160,26 @@ class Fragment {
    * @returns {boolean} true if we support this Content-Type (i.e., type/subtype)
    */
   static isSupportedType(value) {
-    const supportedTypes = ['application/json', 'text/plain', 'text/html'];
-    return supportedTypes.includes(value) || value.startsWith('text/');
-
-    // const validTypes = ['text/plain', 'text/plain; charset=utf-8', 'application/json' , 'application/json; charset=utf-8'];
-    // return validTypes.some((validType) => value.startsWith(validType));
+    // Allow 'text/*', 'application/json', and any content type with 'charset=utf-8'
+    const supportedTypes = [
+      'text/plain',
+      'text/markdown',
+      'text/html',
+      'application/json',
+      'application/yaml',
+      'text/csv',
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/gif',
+      'image/avif'
+    ];
+    
+    // Extract the base type and check if it includes 'charset=utf-8'
+    const [baseType] = value.split(';').map(part => part.trim());
+  
+    // Check if it's a supported type or if it contains 'charset=utf-8'
+    return supportedTypes.includes(baseType) || value.includes('charset=utf-8') || baseType.startsWith('text/');
   }
 }
 

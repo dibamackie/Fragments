@@ -49,4 +49,4 @@ user1@email.com:password1
 
 HTTP/1.1 404
 [Asserts]
-jsonpath "$.error" == "Fragment data not found."
+jsonpath "$.error" == "Fragment not found."

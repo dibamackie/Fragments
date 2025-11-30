@@ -23,8 +23,10 @@ const app = express();
 app.use(compression());
 app.use(pino);
 app.use(helmet());
-app.use(cors());
-app.use(compression()); // (you could remove this duplicate if you want)
+app.use(cors({
+  exposedHeaders: ['Location', 'ETag'],
+}));
+
 
 // ✅ PUBLIC health check route (no auth)
 app.get('/v1/health', (req, res) => {
