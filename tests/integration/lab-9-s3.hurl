@@ -26,6 +26,9 @@ url: header "Location"
 GET {{url}}
 [BasicAuth]
 user1@email.com:password1
+[Options]
+retry: 5              # Try up to 5 times
+retry-interval: 1000  # Wait 1000ms (1s) between attempts
 
 HTTP/1.1 200
 Content-Type: text/plain
@@ -46,6 +49,9 @@ jsonpath "$.status" == "ok"
 GET {{url}}
 [BasicAuth]
 user1@email.com:password1
+[Options]
+retry: 5              # Retry if the status code is NOT 404 yet
+retry-interval: 1000  # Wait 1s between checks
 
 HTTP/1.1 404
 [Asserts]
