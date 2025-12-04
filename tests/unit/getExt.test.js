@@ -16,7 +16,7 @@ describe('GET /v1/fragments/:id with format conversion', () => {
     Fragment.byId.mockResolvedValue({
       id: fragmentId,
       type: 'text/markdown',
-      mimeType: 'text/markdown',
+      mimeType: 'text/markdown', // required by get.js
       size: markdownData.length,
       isText: true,
       getData: jest.fn().mockResolvedValue(Buffer.from(markdownData)),
